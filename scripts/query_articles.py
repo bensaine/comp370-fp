@@ -21,7 +21,6 @@ def query_api(params):
 
     return df
 
-
 def query_articles(
     query,
     api_key,
@@ -31,6 +30,7 @@ def query_articles(
     from_date=None,
     to_date=None,
     sources=None,
+    exclude_domains=None,
     nb_pages=1,
 ):
     """Query articles from News API. Write to CSV if output is provided. Returns DataFrame."""
@@ -47,6 +47,7 @@ def query_articles(
                 "sortBy": sort_by,
                 "searchIn": search_in,
                 "sources": sources,
+                "excludeDomains": exclude_domains,
                 "page": page,
             }
         )
@@ -94,6 +95,11 @@ if __name__ == "__main__":
         "--sources",
         type=str,
         help="Comma-separated list of sources to search in",
+    )
+    parser.add_argument(
+        "--exclude_domains",
+        type=str,
+        help="Comma-separated list of domains to exclude",
     )
     parser.add_argument(
         "--nb_pages",
