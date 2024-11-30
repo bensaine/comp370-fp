@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+.DS_Store
+
 # C extensions
 *.so
 
@@ -123,6 +125,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env*
 .venv
 env/
 venv/

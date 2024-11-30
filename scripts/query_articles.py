@@ -17,7 +17,9 @@ def query_api(params):
     df.reset_index(level=0, inplace=True)
 
     if not df.empty:
-        df["source"] = df["source"].apply(lambda x: x["name"])
+        df["source_name"] = df["source"].apply(lambda x: x["name"])
+        df["source_id"] = df["source"].apply(lambda x: x["id"])
+        df.drop(columns=["source"], inplace=True)
 
     return df
 
