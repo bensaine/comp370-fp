@@ -26,7 +26,7 @@ data = pd.read_csv(
 sentiments = {s: data[data["Sentiment"]==s] \
               for s in ["Positive", "Negative", "Neutral"]}
 
-''' tfidf data '''   
+''' TFIDF '''   
 # Combine 'title' and 'description' into a single text field
 data['text'] = data['title'].fillna('') + ' ' + data['description'].fillna('')
 
@@ -85,6 +85,9 @@ for topic, indices in topic_to_indices.items():
     print("\n")
 
 
+
+
+''' Data Visualization '''
 sns.set_theme()
 ''' potentially useful '''
 def bar_chart_topic_vis():  
@@ -234,4 +237,4 @@ def freq_entire_corpus_vis():
 
 
 if __name__ == "__main__":
-    freq_entire_corpus_vis()
+    sent_per_topic_vis()
