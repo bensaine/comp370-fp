@@ -42,7 +42,7 @@ def preprocess_text(text):
         text = text.replace(first, f'{first}-{last}')
         text = text.replace(f' {last}', '')
 
-    # text = text.replace('joe', 'joe-biden')
+    # text = text.replace('joe', 'joe-biden') conflicts joe rogan
     # Remove punctuation except hyphens
     punctuation_without_hyphen = string.punctuation.replace('-', '')
     text = text.translate(str.maketrans('', '', punctuation_without_hyphen))
