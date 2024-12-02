@@ -15,7 +15,7 @@ import os
 
 
 # Load the data
-annotated_data_path = "../annotated_articles.tsv"
+annotated_data_path = "../flair_updated_annotated_articles_with_neutral.tsv"
 data = pd.read_csv(
     filepath_or_buffer=os.path.join(
         os.path.dirname(__file__), annotated_data_path),
@@ -23,7 +23,7 @@ data = pd.read_csv(
 # print(data.head())
 
 ''' Sentiments data '''
-sentiments = {s: data[data["Sentiment"]==s] \
+sentiments = {s: data[data["Flair_Sentiment"]==s] \
               for s in ["Positive", "Negative", "Neutral"]}
 
 ''' TFIDF '''   
@@ -89,152 +89,105 @@ for topic, indices in topic_to_indices.items():
 
 ''' Data Visualization '''
 sns.set_theme()
-''' potentially useful '''
-def bar_chart_topic_vis():  
-    # For each topic, create a bar chart of the top words
-    for topic, indices in topic_to_indices.items():
-        # Get the rows corresponding to the current topic
-        topic_tfidf = tfidf_matrix[indices]
-        # Compute the mean TF-IDF score for each word in the topic
-        mean_tfidf = topic_tfidf.mean(axis=0).A1
-        # Get the top words and their scores
-        top_indices = mean_tfidf.argsort()[::-1]
-        top_words = [feature_names[i] for i in top_indices if feature_names[i] not in additional_stopwords][:10]
-        top_scores = [mean_tfidf[i] for i in top_indices if feature_names[i] not in additional_stopwords][:10]
-        
-        # Plotting
-        plt.figure(figsize=(10,6))
-        plt.bar(top_words, top_scores, color='skyblue')
-        plt.title(f"Top Words for Topic: {topic}")
-        plt.xlabel("Words")
-        plt.ylabel("Average TF-IDF Score")
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        plt.show()
 
-
-''' potentially useful '''
-def wordcloud_vis(): 
-    for topic, indices in topic_to_indices.items():
-        # Get the rows corresponding to the current topic
-        topic_tfidf = tfidf_matrix[indices]
-        # Compute the mean TF-IDF score for each word in the topic
-        mean_tfidf = topic_tfidf.mean(axis=0).A1
-        # Create a dictionary of word: score
-        word_scores = {feature_names[i]: mean_tfidf[i] for i in range(len(feature_names)) if feature_names[i] not in additional_stopwords}
-        # Generate a word cloud
-        wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(word_scores)
-        
-        # Plotting
-        plt.figure(figsize=(15, 7.5))
-        plt.imshow(wordcloud, interpolation='bilinear')
-        plt.title(f"Word Cloud for Topic: {topic}", fontsize=20)
-        plt.axis('off')
-        plt.show()
-
-
-''' very useful '''
-def sentiment_vis():  
-    # Count the number of articles for each sentiment
-    sentiment_counts = data['Sentiment'].value_counts()
-
-    # Plotting
-    plt.figure(figsize=(8,6))
-    plt.pie(x=sentiment_counts.values, labels=sentiment_counts.index, )
+def save_sentiment_vis(output_dir="flair_plots"):
+    sentiment_counts = data['Flair_Sentiment'].value_counts()
+    os.makedirs(output_dir, exist_ok=True)
+    plt.figure(figsize=(8, 6))
+    plt.pie(x=sentiment_counts.values, labels=sentiment_counts.index, autopct='%1.1f%%')
     plt.title("Distribution of Sentiments")
-    plt.xlabel("Sentiment")
-    plt.ylabel("Number of Articles")
-    plt.show()
+    file_path = os.path.join(output_dir, "sentiment_distribution.png")
+    plt.savefig(file_path)
+    plt.close()
+    print(f"Saved sentiment distribution plot at {file_path}")
 
-    
-''' meh '''
-def heatmap_vis():  
-
-    # Get top words across all topics
-    top_n = 10
-    topics = list(topic_to_indices.keys())
-    top_words_per_topic = {}
-
-    for topic, indices in topic_to_indices.items():
-        topic_tfidf = tfidf_matrix[indices]
-        mean_tfidf = topic_tfidf.mean(axis=0).A1
-        top_indices = mean_tfidf.argsort()[::-1]
-        top_words = [feature_names[i] for i in top_indices if feature_names[i] not in additional_stopwords][:top_n]
-        top_words_per_topic[topic] = top_words
-
-    # Create a set of unique top words
-    unique_top_words = set()
-    for words in top_words_per_topic.values():
-        unique_top_words.update(words)
-    unique_top_words = list(unique_top_words)
-    # Create a DataFrame to store TF-IDF scores
-    heatmap_data = pd.DataFrame(index=unique_top_words, columns=topics)
-
-    for topic, indices in topic_to_indices.items():
-        topic_tfidf = tfidf_matrix[indices]
-        mean_tfidf = topic_tfidf.mean(axis=0).A1
-        word_scores = {feature_names[i]: mean_tfidf[i] for i in range(len(feature_names))}
-        for word in unique_top_words:
-            heatmap_data.loc[word, topic] = word_scores.get(word, 0)
-
-    # Convert data to float
-    heatmap_data = heatmap_data.astype(float)
-
-    # Plot heatmap
-    plt.figure(figsize=(12,10))
-    sns.heatmap(heatmap_data, annot=True, fmt=".2f", cmap='YlGnBu')
-    plt.title("Heatmap of Top Words TF-IDF Scores Across Topics")
-    plt.xlabel("Topics")
-    plt.ylabel("Words")
-    plt.show()
-
-
-''' very useful '''
-def sent_per_topic_vis(): 
+def save_sent_per_topic_vis(output_dir="flair_plots"):
     topics = data['topic'].unique()
-    # Create a DataFrame to store sentiment counts per topic
     sentiment_per_topic = pd.DataFrame(0, index=topics, columns=['Positive', 'Negative', 'Neutral'])
-
     for topic in topics:
         topic_data = data[data['topic'] == topic]
-        sentiment_counts = topic_data['Sentiment'].value_counts()
+        sentiment_counts = topic_data['Flair_Sentiment'].value_counts()
         for sentiment in sentiment_counts.index:
             sentiment_per_topic.loc[topic, sentiment] = sentiment_counts[sentiment]
-
-    # Plotting
-    sentiment_per_topic.plot(kind='bar', stacked=True, figsize=(12,8), colormap='viridis')
+    os.makedirs(output_dir, exist_ok=True)
+    ax = sentiment_per_topic.plot(kind='bar', stacked=True, figsize=(12, 8), colormap='viridis')
     plt.title("Sentiment Distribution per Topic")
     plt.xlabel("Topic")
     plt.ylabel("Number of Articles")
     plt.legend(title='Sentiment')
     plt.tight_layout()
-    plt.show()
+    file_path = os.path.join(output_dir, "sentiment_distribution_per_topic.png")
+    plt.savefig(file_path)
+    plt.close()
+    print(f"Saved sentiment per topic plot at {file_path}")
 
-
-''' potentially useful '''
-def freq_entire_corpus_vis():
-
-    # Combine all cleaned text
+def save_freq_entire_corpus_vis(output_dir="flair_plots"):
     all_words = ' '.join(data['cleaned_text']).split()
-
-    # Count word frequencies
     word_counts = Counter(all_words)
     most_common_words = word_counts.most_common(20)
-
-    # Separate words and counts
     words, counts = zip(*most_common_words)
-
-    # Plotting
-    plt.figure(figsize=(12,6))
+    os.makedirs(output_dir, exist_ok=True)
+    plt.figure(figsize=(12, 6))
     sns.barplot(x=list(words), y=list(counts), palette='cubehelix')
     plt.title("Most Frequent Words Across All Articles")
     plt.xlabel("Words")
     plt.ylabel("Frequency")
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.show()
+    file_path = os.path.join(output_dir, "most_frequent_words.png")
+    plt.savefig(file_path)
+    plt.close()
+    print(f"Saved most frequent words plot at {file_path}")
 
+def save_wordcloud_vis(output_dir="flair_plots"):
+    os.makedirs(output_dir, exist_ok=True)
+    for topic, indices in topic_to_indices.items():
+        topic_tfidf = tfidf_matrix[indices]
+        mean_tfidf = topic_tfidf.mean(axis=0).A1
+        word_scores = {feature_names[i]: mean_tfidf[i] for i in range(len(feature_names))}
+        wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(word_scores)
+        plt.figure(figsize=(15, 7.5))
+        plt.imshow(wordcloud, interpolation='bilinear')
+        plt.title(f"Word Cloud for Topic: {topic}")
+        plt.axis('off')
+        file_path = os.path.join(output_dir, f"wordcloud_topic_{topic}.png")
+        plt.savefig(file_path)
+        plt.close()
+        print(f"Saved word cloud for topic '{topic}' at {file_path}")
 
+def save_heatmap_vis(output_dir="flair_plots"):
+    top_n = 10
+    topics = list(topic_to_indices.keys())
+    top_words_per_topic = {}
+    for topic, indices in topic_to_indices.items():
+        topic_tfidf = tfidf_matrix[indices]
+        mean_tfidf = topic_tfidf.mean(axis=0).A1
+        top_indices = mean_tfidf.argsort()[::-1]
+        top_words = [feature_names[i] for i in top_indices][:top_n]
+        top_words_per_topic[topic] = top_words
+    unique_top_words = list({word for words in top_words_per_topic.values() for word in words})
+    heatmap_data = pd.DataFrame(index=unique_top_words, columns=topics)
+    for topic, indices in topic_to_indices.items():
+        topic_tfidf = tfidf_matrix[indices]
+        mean_tfidf = topic_tfidf.mean(axis=0).A1
+        word_scores = {feature_names[i]: mean_tfidf[i] for i in range(len(feature_names))}
+        for word in unique_top_words:
+            heatmap_data.loc[word, topic] = word_scores.get(word, 0)
+    heatmap_data = heatmap_data.astype(float)
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(heatmap_data, annot=True, fmt=".2f", cmap='YlGnBu')
+    plt.title("Heatmap of Top Words TF-IDF Scores Across Topics")
+    plt.xlabel("Topics")
+    plt.ylabel("Words")
+    file_path = os.path.join(output_dir, "heatmap_tfidf_scores.png")
+    plt.savefig(file_path)
+    plt.close()
+    print(f"Saved heatmap at {file_path}")
 
-if __name__ == "__main__":
-    sent_per_topic_vis()
+# Call all the functions
+output_dir = "flair_plots_neutral"
+save_sentiment_vis(output_dir=output_dir)
+save_sent_per_topic_vis(output_dir=output_dir)
+save_freq_entire_corpus_vis(output_dir=output_dir)
+save_wordcloud_vis(output_dir=output_dir)
+save_heatmap_vis(output_dir=output_dir)
