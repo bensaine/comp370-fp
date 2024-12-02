@@ -17,6 +17,22 @@ data = pd.read_csv(
     filepath_or_buffer=os.path.join(os.path.dirname(__file__), annotated_data_path)
 )
 
+print(data.head())
+
+''' Sentiments data '''
+sentiments = {
+    s: data[data["Sentiment"]==s] for s in ["Positive", "Negative", "Neutral"]
+}
+
+for s in sentiments:
+    print(f'==================> {s} results <==================', 
+          sentiments[s], '\n\n', 
+          f'\t\ttotal {s} -> {len(sentiments[s])} \n\n',
+          '=========================*****======================\n\n'
+          )
+
+
+''' tfidf data '''   
 # Combine 'title' and 'description' into a single text field
 data['text'] = data['title'].fillna('') + ' ' + data['description'].fillna('')
 
