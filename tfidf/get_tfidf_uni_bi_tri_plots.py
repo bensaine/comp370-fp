@@ -118,8 +118,10 @@ for topic in topics:
     df_unigrams_top10 = df_unigrams.sort_values(by='score', ascending=False).head(10)
     
     # Plot and save top 10 unigrams (plain)
+    # Plot and save top 10 unigrams (plain)
     plt.figure(figsize=(10, 6))
-    sns.barplot(data=df_unigrams_top10, x='score', y='term', palette='Blues_d')
+    colors = sns.color_palette("muted", len(df_unigrams_top10))
+    sns.barplot(data=df_unigrams_top10, x='score', y='term', palette=colors)
     plt.title(f"Top 10 Unigrams for Topic: {topic}")
     plt.xlabel("TF-IDF Score")
     plt.ylabel("Unigram")
@@ -130,7 +132,8 @@ for topic in topics:
     
     # Plot and save top 10 bigrams
     plt.figure(figsize=(10, 6))
-    sns.barplot(data=df_bigrams, x='score', y='term', palette='Greens_d')
+    colors = sns.color_palette("muted", len(df_bigrams))
+    sns.barplot(data=df_bigrams, x='score', y='term', palette=colors)
     plt.title(f"Top 10 Bigrams for Topic: {topic}")
     plt.xlabel("TF-IDF Score")
     plt.ylabel("Bigram")
@@ -141,7 +144,8 @@ for topic in topics:
     
     # Plot and save top 10 trigrams
     plt.figure(figsize=(10, 6))
-    sns.barplot(data=df_trigrams, x='score', y='term', palette='Reds_d')
+    colors = sns.color_palette("muted", len(df_trigrams))
+    sns.barplot(data=df_trigrams, x='score', y='term', palette=colors)
     plt.title(f"Top 10 Trigrams for Topic: {topic}")
     plt.xlabel("TF-IDF Score")
     plt.ylabel("Trigram")
@@ -152,7 +156,8 @@ for topic in topics:
     
     # Plot and save top 10 unigrams excluding words in top bigrams and trigrams
     plt.figure(figsize=(10, 6))
-    sns.barplot(data=df_unigrams_excl, x='score', y='term', palette='Purples_d')
+    colors = sns.color_palette("muted", len(df_unigrams_excl))
+    sns.barplot(data=df_unigrams_excl, x='score', y='term', palette=colors)
     plt.title(f"Top 10 Unigrams Excluding Words in Top Bigrams and Trigrams for Topic: {topic}")
     plt.xlabel("TF-IDF Score")
     plt.ylabel("Unigram")
