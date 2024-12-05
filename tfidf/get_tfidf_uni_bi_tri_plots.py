@@ -26,7 +26,9 @@ df['text'] = df['title'] + ' ' + df['description']
 
 # Define stopwords and add 'donald' and 'trump' to the list
 stop_words = set(stopwords.words('english'))
-stop_words.update(['donald', 'trump'])  # Exclude 'donald' and 'trump'
+stop_words.update(['donald', 'trump', 'former', 'vice', 
+                        'president', 'election', 'vote', 'kamala', 'harris',
+                        'biden', 'american', 'great', 'new', 'president-elect'])  # Exclude more generic terms
 
 # Preprocess text function
 def preprocess_text(text):

@@ -31,18 +31,14 @@ sentiments = {s: data[data["Flair_Sentiment"]==s] \
 data['text'] = data['title'].fillna('') + ' ' + data['description'].fillna('')
 
 # Define additional stop words
-additional_stopwords = {'donald', 'trump'}
+additional_stopwords = {'donald', 'trump', 'former', 'vice', 
+                        'president', 'election', 'vote', 'kamala', 'harris',
+                        'biden', 'american', 'great', 'new', 'president-elect'}
 
 # Preprocess the text data
 def preprocess_text(text):
     # Convert to lowercase
     text = text.lower()
-
-    for first, last in [('elon', 'musk'), ('kamala', 'harris')]:
-        text = text.replace(first, f'{first}-{last}')
-        text = text.replace(f' {last}', '')
-
-    # text = text.replace('joe', 'joe-biden') conflicts joe rogan
     # Remove punctuation except hyphens
     punctuation_without_hyphen = string.punctuation.replace('-', '')
     text = text.translate(str.maketrans('', '', punctuation_without_hyphen))
